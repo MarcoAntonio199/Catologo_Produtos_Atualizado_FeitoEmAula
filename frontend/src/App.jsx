@@ -1,111 +1,115 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import Header from "./components/Header";
 import FormProduto from "./components/FormProduto";
 import ListaProdutos from "./components/ListaProdutos";
 
-import Footer from ".././src/components/Footer";
+import Footer from "./components/Footer";
 
-export default function App(){
-    const [produtos, setProdutos] = useState([]);
-    const [mensagem, setMensagem] = useState("");
+function App() {
+  const [produtos, setProdutos] = useState([]);
+  const [mensagem, setMensagem] = useState("");
 
-    const [busca, setBusca] = useState("");
+  const [busca, setBusca] = useState("");
 
-     async function carregarProdutos() {
-        try{
-            const resposta = await fetch("/api/produtos");
-        const dados = await resposta.json();
-
-        setProdutos(dados);
-        }catch (erro){
-        setMensagem("Nao foi possivel carregar os produtos", erro)
-        }
-     }
-
-     useEffect(()=>{
-        carregarProdutos();
-     }, []);
-
-     async function cadastrarProduto(produto){
-        setMensagem("");
+  // Busca os produtos quando a aplicação é carregada.
+  async function carregarProdutos() {
+    try {
+      const resposta = await fetch("/api/produtos");
+      const dados = await resposta.json();
+      setProdutos(dados);
+    } catch (erro){
+      setMensagem("Não foi possível carregar os produtos.", erro);
+    }
+  }
 
 
-        try{
-            const resposta = await fetch ("/api/produtos", {
-                method: "Post",
-                headers: {
-                    "Content-type": "application/json"
-                },
-                body: JSON.stringify(produto)
-            });
+  useEffect(() => {
+    carregarProdutos();
+  }, []);
 
-            if (!resposta.ok){
-                const erro = await resposta.json();
-                setMensagem(erro.mensagem);
-                return;
-            }
+  async function cadastrarProduto(produto) {
+    setMensagem("");
 
-            const novoProduto = await resposta.json();
+    try {
+      const resposta = await fetch("/api/produtos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(produto)
+      });
 
-            setProdutos((produtosAtuais) => [...produtosAtuais, novoProduto])
-            setMensagem("Produto cadastrado com sucesso");
-        
+      if (!resposta.ok) {
+        const erro = await resposta.json();
+        setMensagem(erro.mensagem);
+        return;
+      }
 
-        }catch (erro){
-            setMensagem("nao foi possivel cadastrar o produto", erro);
-        }
-     }
+      const novoProduto = await resposta.json();
+
+      // Atualiza o estado sem precisar recarregar a página.
+      setProdutos((produtosAtuais) => [...produtosAtuais, novoProduto]);
+      setMensagem("Produto cadastrado com sucesso.");
+    } catch (erro){
+      setMensagem("Não foi possível cadastrar o produto.", erro);
+    }
+  }
+
+  const produtosFiltrados = produtos.filter((produto)=> 
+
+    produto.nome.toLowerCase().includes(busca.toLowerCase())
+
+  );
+    
 
 
-     const produtosFiltados = produtos.filter((produto)=> 
-        produto.nome.toLowerCase().includes(busca.toLocaleLowerCase())
-    ); 
+  return (
+    <>
+      <Header />
 
-
-
-
-      return(
-        <>
-        <Headers/>
-
-        <main className="container">
+      <main className="container">
 
         <section className="painel-resumo">
-            <div>
-                <span className="tag">Projeto integrador</span>
-                <h2>Evolução de catalogo</h2>
+          <div>
+            <span className="tag">PROJETO INTEGRADOR</span>
+            <h2>Evolução do Catálogo</h2>
 
-                <p>Front-end em react conectado a api do porjeto</p>
-            </div>
+            <p>
+              Front-end em React conectado à API do projeto
+            </p>
+          </div>
 
-            <div className="contador-produtos">
-                <span>Total de produtos</span>
-                <strong>{produtos.length}</strong>
-            </div>
+          <div className="contador-produtos">
+            <span>Total de Produtos</span>
+            <strong>{produtos.length}</strong>
+          </div>
         </section>
 
-        <FormProduto aoCadastrar={cadastrarProduto}/>
+        <FormProduto  aoCadastrar={cadastrarProduto} />
 
-        {mensagem && <p className="mensagem">{mensagem}</p>}
+        {mensagem && <p className="mensagem"> {mensagem}</p>}
 
         <section className="area-busca">
-            <div>
-            <span className="tag"> Busca Rapida </span>
-            <h2>Encontre um produto</h2>
-            </div>
 
-            <input 
-            type="text" 
+          <div>
+            <span className="tag">BUSCA RÁPIDA</span>
+            <h2>Encontre um produto</h2>
+          </div>
+
+          <input
+            type="text"
             value={busca}
             onChange={(evento)=> setBusca(evento.target.value)}
-            placeholder="Digite o nome do produto"
-            />
-            </section> 
+            placeholder="Digite o nome do produto..."
+          />
+        </section>
 
-        <ListaProdutos produtos={produtos}/>
-        </main>
+        <ListaProdutos produtos={produtosFiltrados} busca ={busca}/>
+      </main>
 
-            <Footer/>
-</>
-    )
+      <Footer />
+    </>
+  );
 }
+
+export default App;
