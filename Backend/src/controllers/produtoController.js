@@ -1,33 +1,31 @@
 const produtos = require("../data/produtos");
 
-function listarProdutos (req, res){
- res.json(produtos);
+function listarProdutos(req, res) {
+  res.json(produtos);
 }
 
+function cadastrarProduto(req, res) {
+  const { nome, descricao, preco } = req.body;
 
-function cadastrarProdutos(req, res){
-    const {nome, descricao, preco} = req.body;
-
-
-if (!nome || preco === undefined){
+  if (!nome || preco === undefined) {
     return res.status(400).json({
-        mensagem: "Nome e preço são obrigatorios."
+      mensagem: "Nome e preço são obrigatórios."
     });
-}
+  }
 
-const novoProduto = {
-    id: produtos.lenght > 0 ? produtos[produtos.lenght - 1].id + 1 : 1,
+  const novoProduto = {
+    id: produtos.length > 0 ? produtos[produtos.length - 1].id + 1 : 1,
     nome,
     descricao: descricao || "",
     preco: Number(preco)
-};
+  };
 
-produtos.push(novoProduto);
+  produtos.push(novoProduto);
 
-res.status(201).json(novoProduto);
+  res.status(201).json(novoProduto);
 }
 
 module.exports = {
-    listarProdutos,
-    cadastrarProduto
+  listarProdutos,
+  cadastrarProduto
 };
